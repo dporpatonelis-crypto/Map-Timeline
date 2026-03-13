@@ -64,6 +64,70 @@
     opacity: 1;
   }
 
+  /* Video support — same behaviour as image */
+  .scene-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .scene-video.active { opacity: 1; }
+
+  /* iframe embed (YouTube / Google Slides) */
+  .scene-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    background: #000;
+  }
+  .scene-iframe.active { opacity: 1; }
+
+  /* Media-type badge */
+  #media-badge {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    background: rgba(10,10,15,0.75);
+    border: 1px solid rgba(200,169,110,0.35);
+    color: var(--accent);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    padding: 4px 10px;
+    border-radius: 2px;
+    display: none;
+    pointer-events: none;
+  }
+
+  /* Google Slides launch button (shown when slides URL exists) */
+  #slides-btn {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    background: rgba(10,10,15,0.82);
+    border: 1px solid rgba(200,169,110,0.5);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    padding: 7px 16px;
+    cursor: pointer;
+    border-radius: 2px;
+    display: none;
+    transition: background 0.2s;
+  }
+  #slides-btn:hover { background: rgba(200,169,110,0.18); }
+
   .image-overlay {
     position: absolute;
     inset: 0;
@@ -473,6 +537,12 @@
   </div>
   <div class="image-overlay"></div>
 
+  <!-- Media type badge -->
+  <div id="media-badge"></div>
+
+  <!-- Google Slides button -->
+  <button id="slides-btn" onclick="openSlides()">▶ Άνοιγμα Slides</button>
+
   <!-- Info -->
   <div id="info-panel">
     <div id="info-year"></div>
@@ -554,8 +624,12 @@
       <textarea id="f-desc" placeholder="Σύντομη περιγραφή..."></textarea>
     </div>
     <div class="ep-field">
-      <label>URL Εικόνας</label>
-      <input type="text" id="f-img" placeholder="https://..."/>
+      <label>URL Εικόνας / Βίντεο (MP4, YouTube)</label>
+      <input type="text" id="f-img" placeholder="https://... (.jpg / .mp4 / youtube)"/>
+    </div>
+    <div class="ep-field">
+      <label>Google Slides URL (προαιρετικό)</label>
+      <input type="text" id="f-slides" placeholder="https://docs.google.com/presentation/d/…"/>
     </div>
     <div class="ep-field">
       <label>Πόλη / Χώρα (για χάρτη)</label>
@@ -694,33 +768,113 @@ function scrollTimeline(delta) {
   document.getElementById('timeline-track').scrollBy({ left: delta, behavior: 'smooth' });
 }
 
+// ── MEDIA HELPERS ─────────────────────────────────────────────────────────
+let currentSlidesUrl = '';
+
+function mediaType(url) {
+  if (!url) return 'none';
+  const u = url.toLowerCase();
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube';
+  if (u.includes('vimeo.com')) return 'vimeo';
+  if (u.match(/\.mp4(\?|$)/)) return 'mp4';
+  return 'image';
+}
+
+function youtubeEmbedUrl(url) {
+  // Handle youtu.be/ID and youtube.com/watch?v=ID
+  let id = '';
+  const m1 = url.match(/youtu\.be\/([^?&]+)/);
+  const m2 = url.match(/[?&]v=([^&]+)/);
+  if (m1) id = m1[1];
+  else if (m2) id = m2[1];
+  return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=1` : url;
+}
+
+function openSlides() {
+  if (!currentSlidesUrl) return;
+  window.open(currentSlidesUrl, '_blank');
+}
+
 // ── SELECT ITEM ───────────────────────────────────────────────────────────
 function selectItem(id) {
   activeId = id;
   const item = timelineData.find(i => i.id === id);
   if (!item) return;
 
-  // Update timeline active
+  // Update timeline active state
   document.querySelectorAll('.timeline-item').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.id) === id);
   });
 
-  // Update images
+  // Hide all existing media
   document.getElementById('no-image-msg').style.display = 'none';
-  document.querySelectorAll('.scene-image').forEach(img => img.classList.remove('active'));
+  document.querySelectorAll('.scene-image, .scene-video, .scene-iframe').forEach(el => {
+    el.classList.remove('active');
+    // Pause any playing video/iframe
+    if (el.tagName === 'VIDEO') el.pause();
+    if (el.tagName === 'IFRAME') el.src = el.src; // reset iframe
+  });
 
-  let imgEl = document.getElementById('img-' + id);
-  if (!imgEl) {
-    imgEl = document.createElement('img');
-    imgEl.className = 'scene-image';
-    imgEl.id = 'img-' + id;
-    imgEl.src = item.img;
-    imgEl.alt = item.title;
-    document.getElementById('image-display').appendChild(imgEl);
+  const display = document.getElementById('image-display');
+  const badge = document.getElementById('media-badge');
+  const slidesBtn = document.getElementById('slides-btn');
+  const type = mediaType(item.img);
+  const elId = 'media-' + id;
+  let mediaEl = document.getElementById(elId);
+
+  if (type === 'none') {
+    document.getElementById('no-image-msg').style.display = '';
+    badge.style.display = 'none';
+  } else if (type === 'image') {
+    if (!mediaEl) {
+      mediaEl = document.createElement('img');
+      mediaEl.className = 'scene-image';
+      mediaEl.id = elId;
+      mediaEl.src = item.img;
+      mediaEl.alt = item.title;
+      display.appendChild(mediaEl);
+    }
+    badge.style.display = 'none';
+    setTimeout(() => mediaEl.classList.add('active'), 20);
+
+  } else if (type === 'mp4') {
+    if (!mediaEl) {
+      mediaEl = document.createElement('video');
+      mediaEl.className = 'scene-video';
+      mediaEl.id = elId;
+      mediaEl.src = item.img;
+      mediaEl.autoplay = true;
+      mediaEl.muted = true;
+      mediaEl.loop = true;
+      mediaEl.controls = true;
+      mediaEl.style.objectFit = 'cover';
+      display.appendChild(mediaEl);
+    }
+    mediaEl.play().catch(() => {});
+    badge.textContent = '▶ VIDEO';
+    badge.style.display = 'block';
+    setTimeout(() => mediaEl.classList.add('active'), 20);
+
+  } else if (type === 'youtube' || type === 'vimeo') {
+    // Always recreate iframe to avoid autoplay issues
+    if (mediaEl) mediaEl.remove();
+    mediaEl = document.createElement('iframe');
+    mediaEl.className = 'scene-iframe';
+    mediaEl.id = elId;
+    mediaEl.src = type === 'youtube' ? youtubeEmbedUrl(item.img) : item.img;
+    mediaEl.allow = 'autoplay; fullscreen';
+    mediaEl.allowFullscreen = true;
+    display.appendChild(mediaEl);
+    badge.textContent = type === 'youtube' ? '▶ YOUTUBE' : '▶ VIMEO';
+    badge.style.display = 'block';
+    setTimeout(() => mediaEl.classList.add('active'), 20);
   }
-  setTimeout(() => imgEl.classList.add('active'), 20);
 
-  // Update info
+  // Google Slides button
+  currentSlidesUrl = item.slides || '';
+  slidesBtn.style.display = currentSlidesUrl ? 'block' : 'none';
+
+  // Update info panel
   document.getElementById('info-year').textContent = item.year;
   document.getElementById('info-title').textContent = item.title;
   document.getElementById('info-desc').textContent = item.desc;
@@ -763,6 +917,7 @@ function editItem(id) {
   document.getElementById('f-title').value = item.title;
   document.getElementById('f-desc').value = item.desc;
   document.getElementById('f-img').value = item.img;
+  document.getElementById('f-slides').value = item.slides || '';
   document.getElementById('f-location').value = item.location || '';
   document.getElementById('f-lat').value = item.lat || '';
   document.getElementById('f-lng').value = item.lng || '';
@@ -798,6 +953,7 @@ function saveItem() {
   item.title = document.getElementById('f-title').value;
   item.desc = document.getElementById('f-desc').value;
   item.img = document.getElementById('f-img').value;
+  item.slides = document.getElementById('f-slides').value.trim();
   item.location = document.getElementById('f-location').value;
   item.lat = parseFloat(document.getElementById('f-lat').value) || 38;
   item.lng = parseFloat(document.getElementById('f-lng').value) || 23;
@@ -814,16 +970,13 @@ function saveItem() {
     }
   }
 
-  // Refresh cached image if exists
-  const imgEl = document.getElementById('img-' + editingId);
-  if (imgEl) imgEl.src = item.img;
+  // Refresh cached media element if URL changed
+  const mediaEl = document.getElementById('media-' + editingId);
+  if (mediaEl) { mediaEl.remove(); } // force recreate on next select
 
   // Refresh active view if this is the selected item
   if (activeId === editingId) {
-    document.getElementById('info-year').textContent = item.year;
-    document.getElementById('info-title').textContent = item.title;
-    document.getElementById('info-desc').textContent = item.desc;
-    updateMap(item);
+    selectItem(editingId);
   }
 
   renderTimeline();
@@ -863,11 +1016,13 @@ function loadScenario(name) {
   timelineData = scenarios[name].data;
   activeId = null; editingId = null;
   document.getElementById('item-editor').style.display = 'none';
-  document.querySelectorAll('.scene-image').forEach(el => el.remove());
+  document.querySelectorAll('.scene-image, .scene-video, .scene-iframe').forEach(el => el.remove());
   document.getElementById('no-image-msg').style.display = '';
   document.getElementById('info-year').textContent = '';
   document.getElementById('info-title').textContent = '';
   document.getElementById('info-desc').textContent = '';
+  document.getElementById('slides-btn').style.display = 'none';
+  document.getElementById('media-badge').style.display = 'none';
   renderTimeline();
   renderItemList();
   renderScenarioList();
@@ -929,7 +1084,7 @@ function importScenario(event) {
       timelineData = data;
       activeId = null; editingId = null;
       document.getElementById('item-editor').style.display = 'none';
-      document.querySelectorAll('.scene-image').forEach(el => el.remove());
+      document.querySelectorAll('.scene-image, .scene-video, .scene-iframe').forEach(el => el.remove());
       document.getElementById('no-image-msg').style.display = '';
       renderTimeline(); renderItemList(); renderScenarioList();
       if (timelineData.length > 0) setTimeout(() => selectItem(timelineData[0].id), 300);
