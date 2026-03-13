@@ -143,7 +143,7 @@
   #map {
     width: 100%;
     height: 100%;
-    filter: grayscale(0.3) contrast(1.1);
+    filter: grayscale(0.15) contrast(1.05) brightness(1.0);
   }
 
   .map-label {
@@ -152,7 +152,7 @@
     left: 0;
     right: 0;
     padding: 6px 10px;
-    background: rgba(10,10,15,0.85);
+    background: rgba(10,10,15,0.80);
     font-size: 0.65rem;
     letter-spacing: 0.2em;
     color: var(--accent);
@@ -511,8 +511,36 @@
 
   <div class="divider"></div>
 
+  <div class="ep-section">
+    <h3>📁 Σενάρια</h3>
+    <div class="ep-field">
+      <label>Όνομα Σεναρίου</label>
+      <input type="text" id="f-scenario-name" placeholder="π.χ. Βυζαντινή Ιστορία"/>
+    </div>
+    <button class="ep-btn" onclick="saveScenario()">💾 Αποθήκευση Σεναρίου</button>
+    <div style="margin-top:12px;">
+      <div class="ep-field" style="margin-bottom:6px;">
+        <label>Φόρτωση / Διαχείριση</label>
+      </div>
+      <div class="item-list" id="scenario-list"></div>
+    </div>
+    <div style="margin-top:10px; display:flex; gap:6px;">
+      <button class="ep-btn" onclick="exportScenario()" style="flex:1">⬇ Export JSON</button>
+      <label class="ep-btn" style="flex:1; text-align:center; cursor:pointer; margin-top:0;">
+        ⬆ Import JSON
+        <input type="file" accept=".json" onchange="importScenario(event)" style="display:none"/>
+      </label>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
   <div class="ep-section" id="item-editor" style="display:none;">
     <h3>Επεξεργασία Σημείου</h3>
+    <div class="ep-field">
+      <label>Θέση στο Timeline (1 = πρώτο)</label>
+      <input type="number" id="f-pos" placeholder="π.χ. 2" min="1"/>
+    </div>
     <div class="ep-field">
       <label>Έτος / Ημερομηνία</label>
       <input type="text" id="f-year" placeholder="π.χ. 1453, 1821, Ιούνιος 1940"/>
@@ -615,7 +643,7 @@ function initMap() {
     touchZoom: false
   }).setView([37.98, 23.73], 5);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom: 18
   }).addTo(map);
 
@@ -705,6 +733,7 @@ function selectItem(id) {
 function togglePanel() {
   document.getElementById('edit-panel').classList.toggle('open');
   renderItemList();
+  renderScenarioList();
 }
 
 function renderItemList() {
@@ -729,6 +758,7 @@ function editItem(id) {
   const item = timelineData.find(i => i.id === id);
   if (!item) return;
 
+  document.getElementById('f-pos').value = timelineData.findIndex(i => i.id === id) + 1;
   document.getElementById('f-year').value = item.year;
   document.getElementById('f-title').value = item.title;
   document.getElementById('f-desc').value = item.desc;
@@ -773,6 +803,17 @@ function saveItem() {
   item.lng = parseFloat(document.getElementById('f-lng').value) || 23;
   item.zoom = parseInt(document.getElementById('f-zoom').value) || 7;
 
+  // Handle position reorder
+  const desiredPos = parseInt(document.getElementById('f-pos').value);
+  if (!isNaN(desiredPos)) {
+    const curIdx = timelineData.findIndex(i => i.id === editingId);
+    const newIdx = Math.max(0, Math.min(timelineData.length - 1, desiredPos - 1));
+    if (curIdx !== newIdx) {
+      timelineData.splice(curIdx, 1);
+      timelineData.splice(newIdx, 0, item);
+    }
+  }
+
   // Refresh cached image if exists
   const imgEl = document.getElementById('img-' + editingId);
   if (imgEl) imgEl.src = item.img;
@@ -799,7 +840,120 @@ function deleteItem() {
   renderItemList();
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────
+// ── SCENARIOS ─────────────────────────────────────────────────────────────
+function getSavedScenarios() {
+  try { return JSON.parse(localStorage.getItem('tl_scenarios') || '{}'); } catch { return {}; }
+}
+
+function saveScenario() {
+  const name = document.getElementById('f-scenario-name').value.trim();
+  if (!name) { alert('Δώσε όνομα στο σενάριο πρώτα.'); return; }
+  const scenarios = getSavedScenarios();
+  scenarios[name] = { name, data: JSON.parse(JSON.stringify(timelineData)), savedAt: new Date().toLocaleDateString('el') };
+  localStorage.setItem('tl_scenarios', JSON.stringify(scenarios));
+  renderScenarioList();
+  document.getElementById('f-scenario-name').value = '';
+  showToast('Σενάριο "' + name + '" αποθηκεύτηκε!');
+}
+
+function loadScenario(name) {
+  const scenarios = getSavedScenarios();
+  if (!scenarios[name]) return;
+  if (!confirm('Φόρτωση "' + name + '"; Οι αλλαγές δεν θα αποθηκευτούν.')) return;
+  timelineData = scenarios[name].data;
+  activeId = null; editingId = null;
+  document.getElementById('item-editor').style.display = 'none';
+  document.querySelectorAll('.scene-image').forEach(el => el.remove());
+  document.getElementById('no-image-msg').style.display = '';
+  document.getElementById('info-year').textContent = '';
+  document.getElementById('info-title').textContent = '';
+  document.getElementById('info-desc').textContent = '';
+  renderTimeline();
+  renderItemList();
+  renderScenarioList();
+  if (timelineData.length > 0) setTimeout(() => selectItem(timelineData[0].id), 300);
+}
+
+function deleteScenario(name) {
+  if (!confirm('Διαγραφή "' + name + '";')) return;
+  const scenarios = getSavedScenarios();
+  delete scenarios[name];
+  localStorage.setItem('tl_scenarios', JSON.stringify(scenarios));
+  renderScenarioList();
+}
+
+function renderScenarioList() {
+  const list = document.getElementById('scenario-list');
+  const scenarios = getSavedScenarios();
+  const keys = Object.keys(scenarios);
+  list.innerHTML = '';
+  if (keys.length === 0) {
+    list.innerHTML = '<div style="font-size:0.65rem;color:var(--text-dim);padding:6px 0;">Δεν υπάρχουν αποθηκευμένα σενάρια</div>';
+    return;
+  }
+  keys.forEach(name => {
+    const s = scenarios[name];
+    const chip = document.createElement('div');
+    chip.className = 'item-chip';
+    chip.style.cursor = 'default';
+    chip.innerHTML = `
+      <div>
+        <div style="font-size:0.7rem;">${name}</div>
+        <div style="font-size:0.6rem;color:var(--text-dim)">${s.data.length} σημεία · ${s.savedAt}</div>
+      </div>
+      <div class="chip-actions">
+        <button class="chip-btn" title="Φόρτωση" onclick="loadScenario('${name.replace(/'/g,"\\'")}')">▶</button>
+        <button class="chip-btn" title="Διαγραφή" onclick="deleteScenario('${name.replace(/'/g,"\\'")}')">✕</button>
+      </div>`;
+    list.appendChild(chip);
+  });
+}
+
+function exportScenario() {
+  const name = document.getElementById('f-scenario-name').value.trim() || 'timeline-export';
+  const blob = new Blob([JSON.stringify(timelineData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name + '.json';
+  a.click();
+}
+
+function importScenario(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      timelineData = data;
+      activeId = null; editingId = null;
+      document.getElementById('item-editor').style.display = 'none';
+      document.querySelectorAll('.scene-image').forEach(el => el.remove());
+      document.getElementById('no-image-msg').style.display = '';
+      renderTimeline(); renderItemList(); renderScenarioList();
+      if (timelineData.length > 0) setTimeout(() => selectItem(timelineData[0].id), 300);
+      showToast('Import επιτυχές: ' + file.name);
+    } catch { alert('Μη έγκυρο αρχείο JSON.'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:160px;left:50%;transform:translateX(-50%);background:#c8a96e;color:#0a0a0f;padding:8px 18px;border-radius:3px;font-size:0.72rem;font-family:DM Mono,monospace;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+// ── SCENARIOS ─────────────────────────────────────────────────────────────
 initMap();
 renderTimeline();
 
