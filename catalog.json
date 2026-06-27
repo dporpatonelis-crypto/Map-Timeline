@@ -1,11 +1,11 @@
 {
   "scenarios": [
     {
-      "id": "Διονύσιος Αρεοπαγίτης",
+      "id": "dionysios_areopagitis",
       "title": "Εξέλιξη της μετοχής",
       "type": "patristic_text_analysis",
       "status": "complete",
-      "dataFile": "data/Διονύσιος Αρεοπαγίτης.json",
+      "dataFile": "data/dionysios_areopagitis.json",
       "updatedAt": "2026-06-26"
     }
   ]
