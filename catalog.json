@@ -5,7 +5,7 @@
       "title": "Εξέλιξη της μετοχής",
       "type": "patristic_text_analysis",
       "status": "complete",
-      "scenarioFile": "data/Τελικό Διονύσιος πλήρη.json",
+      "scenarioFile": "data/Διονύσιος.json",
       "updatedAt": "2026-06-26"
     }
   ]
