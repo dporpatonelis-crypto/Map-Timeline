@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Puzzle Timeline - Δυναμική Εισαγωγή JSON (Touch)</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f3ef;
+            margin: 0;
+            padding: 20px;
+            touch-action: pan-y pinch-zoom;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; color: #2c3e2f; }
+        .toolbar {
+            background: #e8e0d5;
+            padding: 15px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+        }
+        .toolbar select, .toolbar button, .toolbar input {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 40px;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .toolbar button {
+            background: #3d6b3a;
+            color: white;
+        }
+        .toolbar button.reset-btn { background: #7a5a3a; }
+        .json-area {
+            background: #fef7e0;
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .json-area textarea {
+            width: 100%;
+            height: 120px;
+            font-family: monospace;
+            border-radius: 16px;
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+        .instruction {
+            text-align: center;
+            background: #d9cdb0;
+            padding: 10px;
+            border-radius: 40px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .timeline-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: #d9cdb0;
+            padding: 15px;
+            border-radius: 30px;
+            min-height: 200px;
+        }
+        .timeline-slot {
+            background: #b59d6e;
+            border-radius: 20px;
+            padding: 8px;
+            width: 240px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slot-number {
+            background: #3e2a1f;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .slot-card {
+            background: white;
+            width: 100%;
+            border-radius: 16px;
+            padding: 8px;
+            border-left: 6px solid #ab8e5c;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .slot-card:active { cursor: grabbing; }
+        .slot-card img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            pointer-events: none;
+        }
+        .slot-card h4 { font-size: 0.8rem; margin: 5px 0; }
+        .slot-card .location { font-size: 0.7rem; color: #7f6b4a; }
+        .empty-slot {
+            background: #8b7355;
+            width: 100%;
+            border-radius: 16px;
+            padding: 20px 8px;
+            text-align: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+        .cards-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            background: #e8e0d5;
+            border-radius: 40px;
+            padding: 20px;
+            min-height: 300px;
+        }
+        .pool-card {
+            background: white;
+            width: 260px;
+            border-radius: 24px;
+            padding: 12px;
+            border-left: 10px solid #ab8e5c;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .pool-card:active { cursor: grabbing; }
+        .pool-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 16px;
+            pointer-events: none;
+        }
+        .pool-card h3 { margin: 8px 0; font-size: 1.1rem; }
+        .pool-card .desc { font-size: 0.8rem; color: #2c3e2f; margin: 6px 0; }
+        .pool-card .location { font-size: 0.75rem; font-weight: bold; color: #7f6b4a; }
+        .drag-ghost {
+            position: fixed;
+            width: 240px;
+            background: white;
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            opacity: 0.85;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            border-left: 8px solid #ab8e5c;
+        }
+        .drag-ghost img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .feedback { text-align: center; font-size: 1.2rem; margin-top: 20px; font-weight: bold; }
+        .correct-feedback { color: #1f5c1f; }
+        .wrong-feedback { color: #aa3e2c; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⏳ Puzzle Timeline - Δημιουργία σεναρίων από JSON ⏳</h1>
+    
+    <div class="toolbar">
+        <select id="scenarioSelect">
+            <option value="philosophy">📜 Αρχαία & Χριστιανική Σκέψη</option>
+            <option value="goldenage">🏛️ Χρυσός Αιώνας (499-400 π.Χ.)</option>
+        </select>
+        <button id="loadScenarioBtn">Φόρτωση επιλεγμένου</button>
+        <input type="file" id="jsonUpload" accept=".json">
+        <button id="resetGameBtn" class="reset-btn">🔄 Ανάμειξη & Επαναφορά</button>
+    </div>
+    
+    <div class="json-area">
+        <textarea id="jsonInput" placeholder="Επικόλλησε εδώ ένα έγκυρο JSON array ..."></textarea>
+        <div style="text-align:right; margin-top:5px;">
+            <button id="applyJsonBtn">✅ Εφαρμογή JSON</button>
+        </div>
+    </div>
+    
+    <div class="instruction">
+        ✋🏻 Σύρε με το δάχτυλο οποιαδήποτε κάρτα (από το pool ή από θέση) και άφησέ την πάνω σε άλλη θέση ή πίσω στο pool για διόρθωση.
+    </div>
+    
+    <div id="timelineSlotsContainer" class="timeline-area"></div>
+    <div id="cardsPoolContainer" class="cards-pool"></div>
+    
+    <div style="text-align:center;">
+        <button id="checkBtn">🔍 Έλεγχος σειράς</button>
+    </div>
+    <div id="feedback" class="feedback"></div>
+</div>
+
+<script>
+    // ===================== ΠΡΟΚΑΘΟΡΙΣΜΕΝΑ ΣΕΝΑΡΙΑ =====================
+    const SCENARIOS = {
+        philosophy: [
+            { id: 1778409487851, year: "~427-347 π.Χ.", title: "Πλάτων – Η Μετοχή στις Ιδέες", desc: "Ο Πλάτων εισήγαγε την έννοια της «μετοχής»...", img: "https://i.ibb.co/LDN0sWGp/The-Sacred-Blueprint-page-0002.jpg", location: "Αθήνα" },
+            { id: 1778409487852, year: "~384-322 π.Χ.", title: "Αριστοτέλης – Η Μετοχή στη Θεία Ευδαιμονία", desc: "Ο Αριστοτέλης όρισε τον Θεό ως «πρώτον κινούν ακίνητον»...", img: "https://i.ibb.co/PGmWDBjt/The-Sacred-Blueprint-page-0014.jpg", location: "Αθήνα" },
+            { id: 1778409487853, year: "~3ος αιώνας π.Χ.", title: "Στωικισμός – Ο Λόγος ως Πυρ και η Παγκόσμια Συμπάθεια", desc: "Οι Στωικοί δίδαξαν ότι ο Λόγος είναι υλική συνεκτική δύναμη...", img: "https://i.ibb.co/q3Ty33Vq/The-Sacred-Blueprint-page-0005.jpg", location: "Αθήνα" },
+            { id: 1778409487854, year: "~1ος αιώνας μ.Χ.", title: "Ιωάννης ο Θεολόγος – Ο Ένσαρκος Λόγος", desc: "Ο Ιωάννης μετέτρεψε τον φιλοσοφικό Λόγο σε δεύτερο Πρόσωπο...", img: "https://i.ibb.co/6RDfMcx1/The-Sacred-Blueprint-page-0013.jpg", location: "Έφεσος" },
+            { id: 1778409487855, year: "~185-254 μ.Χ.", title: "Ωριγένης – Η Ιεραρχική Μετοχή των Λογικών Όντων", desc: "Ο Ωριγένης δημιούργησε αιώνιο ιεραρχικό σύστημα όντων...", img: "https://i.ibb.co/V0S43ngy/The-Sacred-Blueprint-page-0012.jpg", location: "Αλεξάνδρεια" },
+            { id: 1778409487856, year: "~329-390 μ.Χ.", title: "Γρηγόριος ο Θεολόγος – Ο Αποφατισμός του Φωτός", desc: "Ο Γρηγόριος δίδαξε ότι ο Θεός υπερβαίνει κάθε ανθρώπινη κατάληψη...", img: "https://i.ibb.co/twQyyfQP/The-Sacred-Blueprint-page-0011.jpg", location: "Ναζιανζός" },
+            { id: 1778409487857, year: "~335-394 μ.Χ.", title: "Γρηγόριος Νύσσης – Η Επέκταση στο Άπειρο", desc: "Ο Γρηγόριος Νύσσης μεταμόρφωσε το άπειρο σε θετική ιδιότητα...", img: "https://i.ibb.co/nNYp6P4B/The-Sacred-Blueprint-page-0006.jpg", location: "Νύσσα Καππαδοκίας" },
+            { id: 1778409487858, year: "~5ος αιώνας μ.Χ.", title: "Διονύσιος Αρεοπαγίτης – Η Απορροή και η Ιεραρχία", desc: "Ο Διονύσιος «εκχριστιάνισε» τον νεοπλατωνισμό...", img: "https://i.ibb.co/n861J2T2/The-Sacred-Blueprint-page-0003.jpg", location: "Κωνσταντινούπολη" },
+            { id: 1778409487859, year: "~580-662 μ.Χ.", title: "Μάξιμος ο Ομολογητής – Οι Λόγοι των Όντων", desc: "Ο Μάξιμος ανέπτυξε τη διδασκαλία για τους «Λόγους των όντων»...", img: "https://i.ibb.co/8nJp0wwB/The-Sacred-Blueprint-page-0015.jpg", location: "Κωνσταντινούπολη" },
+            { id: 1778409487860, year: "~949-1022 μ.Χ.", title: "Συμεών ο Νέος Θεολόγος – Η Εμπειρία του Ακτίστου Φωτός", desc: "Ο Συμεών τόνισε ότι η μετοχή στον Θεό δεν είναι αφηρημένο δόγμα...", img: "https://i.ibb.co/TqcDJYxK/The-Sacred-Blueprint-page-0008.jpg", location: "Κωνσταντινούπολη" },
+            { id: 1778409487861, year: "~1296-1357 μ.Χ.", title: "Γρηγόριος Παλαμάς – Η Διάκριση Ουσίας και Ενέργειας", desc: "Ο Παλαμάς συστηματοποίησε τη διάκριση μεταξύ της απρόσιτης θείας ουσίας...", img: "https://i.ibb.co/F49ZXsfF/The-Sacred-Blueprint-page-0009.jpg", location: "Άγιον Όρος" }
+        ],
+        goldenage: [
+            { id: 1773388754927, year: "499-400 π.Χ.", title: "Χρυσός Αιώνας", desc: "Ελληνική Αρχαιότητα", img: "https://i.ibb.co/FLZDgLRW/Mapping-Classical-Greece.jpg", location: "Αρχαία Ελλάδα" },
+            { id: 1773389564920, year: "499-400 π.Χ", title: "Αθήνα", desc: "Άνθηση τεχνών και επιστημών", img: "https://i.ibb.co/G43jtPHJ/Mapping-Classical-Greece-2.jpg", location: "Αθήνα" },
+            { id: 1773389710064, year: "499-400 π.Χ", title: "Σπάρτη", desc: "Πειθαρχία και αρετή", img: "https://i.ibb.co/fdXHmsBS/Mapping-Classical-Greece-3.jpg", location: "Σπάρτη" },
+            { id: 1773390610488, year: "499-400 π.Χ", title: "Δελφοί", desc: "Μαντείο", img: "https://i.ibb.co/h1mwhLDV/Mapping-Classical-Greece-7.jpg", location: "Δελφοί" },
+            { id: 1773390705323, year: "499-400 π.Χ", title: "Ολυμπία", desc: "Ολυμπιακοί αγώνες", img: "https://i.ibb.co/7xQJ0dGf/Mapping-Classical-Greece.jpg", location: "Ολυμπία" },
+            { id: 1773381969608, year: "490 π.Χ", title: "Μάχη του Μαραθώνα", desc: "Απόκρουση των Περσών", img: "https://i.ibb.co/N22g3KNZ/Mapping-Classical-Greece-4.jpg", location: "Αθήνα" },
+            { id: 1773390337176, year: "480 π.Χ", title: "Σαλαμίνα", desc: "Β΄ Περσικός Πόλεμος", img: "https://i.ibb.co/CTkPtxS/Mapping-Classical-Greece-5.jpg", location: "" },
+            { id: 1773390527413, year: "479 π.Χ", title: "Πλαταιές", desc: "Τελική Μάχη", img: "https://i.ibb.co/0RgNmwP4/Mapping-Classical-Greece-6.jpg", location: "" },
+            { id: 1773390775041, year: "431-404 π.Χ.", title: "Πελοποννησιακός Πόλεμος", desc: "Εμφύλιος", img: "https://i.ibb.co/N2GC2WV3/Mapping-Classical-Greece-1.jpg", location: "" }
+        ]
+    };
+    
+    // Μεταβλητές κατάστασης
+    let currentItems = [];          // τα στοιχεία του ενεργού σεναρίου (array)
+    let currentCards = [];          // κάρτες στο pool (μη τοποθετημένες)
+    let placedCards = [];           // θέσεις χρονολογίας (array ίδιου μήκους με currentItems)
+    let correctOrderIds = [];       // σωστή σειρά ID με βάση την ημερομηνία
+    
+    // Βοηθητική συνάρτηση μετατροπής year string σε αριθμό για σύγκριση
+    function getNumericYear(yearStr) {
+        if (!yearStr) return 0;
+        let cleaned = yearStr.replace(/~/g, '').trim();
+        if (cleaned.includes("π.Χ.")) {
+            let match = cleaned.match(/(\d+)/);
+            if (match) return -parseInt(match[1]);
+            return -500;
+        } else if (cleaned.includes("αιώνας") && cleaned.includes("π.Χ.")) {
+            let match = cleaned.match(/(\d+)/);
+            if (match) return -((parseInt(match[1])-1)*100 + 50);
+            return -300;
+        } else if (cleaned.includes("αιώνας") && cleaned.includes("μ.Χ.")) {
+            let match = cleaned.match(/(\d+)/);
+            if (match) return (parseInt(match[1])-1)*100 + 50;
+            return 500;
+        } else if (cleaned.includes("μ.Χ.")) {
+            let match = cleaned.match(/(\d+)-(\d+)/);
+            if (match) return (parseInt(match[1]) + parseInt(match[2]))/2;
+            match = cleaned.match(/(\d+)/);
+            if (match) return parseInt(match[1]);
+        } else {
+            // περίπτωση "499-400 π.Χ." ή "490 π.Χ"
+            if (cleaned.includes("π.Χ")) {
+                let match = cleaned.match(/(\d+)/);
+                if (match) return -parseInt(match[1]);
+            }
+            let match = cleaned.match(/(\d+)-(\d+)/);
+            if (match) return (parseInt(match[1]) + parseInt(match[2]))/2;
+            match = cleaned.match(/(\d+)/);
+            if (match) return parseInt(match[1]);
+        }
+        return 0;
+    }
+    
+    // Αρχικοποίηση ή αλλαγή σεναρίου
+    function loadScenario(itemsArray) {
+        currentItems = [...itemsArray];
+        // Υπολογισμός σωστής σειράς βάσει year
+        const sorted = [...currentItems].sort((a,b) => getNumericYear(a.year) - getNumericYear(b.year));
+        correctOrderIds = sorted.map(item => item.id);
+        // Αρχικοποίηση game state: όλες οι κάρτες στο pool, καμία τοποθετημένη
+        placedCards = new Array(currentItems.length).fill(null);
+        currentCards = shuffleArray([...currentItems]);
+        renderAll();
+        document.getElementById('feedback').innerHTML = '';
+    }
+    
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    // ========== DRAG & DROP TOUCH (ίδια λογική με πριν, αλλά αναφορά στις current μεταβλητές) ==========
+    let dragState = {
+        active: false,
+        cardData: null,
+        sourceType: null,   // 'pool' ή 'slot'
+        sourceIndex: null,
+        startTouchId: null,
+        ghost: null,
+        sourceElement: null
+    };
+    
+    function createGhost(cardData, touchX, touchY) {
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.innerHTML = `
+            <img src="${cardData.img}" onerror="this.src='https://via.placeholder.com/240x100?text=No+Image'">
+            <strong>${cardData.title}</strong>
+            <div style="font-size:0.7rem;">${cardData.location || ''}</div>
+        `;
+        ghost.style.left = `${touchX}px`;
+        ghost.style.top = `${touchY}px`;
+        document.body.appendChild(ghost);
+        return ghost;
+    }
+    
+    function onTouchStart(e, cardData, sourceType, sourceIndex, element) {
+        e.preventDefault();
+        if (dragState.active) return;
+        dragState.active = true;
+        dragState.cardData = cardData;
+        dragState.sourceType = sourceType;
+        dragState.sourceIndex = sourceIndex;
+        dragState.sourceElement = element;
+        const touch = e.touches[0];
+        dragState.startTouchId = touch.identifier;
+        dragState.ghost = createGhost(cardData, touch.clientX, touch.clientY);
+        element.style.opacity = '0.4';
+    }
+    
+    function onTouchMove(e) {
+        if (!dragState.active || !dragState.ghost) return;
+        e.preventDefault();
+        const touch = Array.from(e.touches).find(t => t.identifier === dragState.startTouchId);
+        if (!touch) return;
+        dragState.ghost.style.left = `${touch.clientX}px`;
+        dragState.ghost.style.top = `${touch.clientY}px`;
+    }
+    
+    function onTouchEnd(e) {
+        if (!dragState.active) return;
+        e.preventDefault();
+        const changedTouch = e.changedTouches[0];
+        const endX = changedTouch.clientX;
+        const endY = changedTouch.clientY;
+        const elementsUnder = document.elementsFromPoint(endX, endY);
+        
+        let targetSlot = null;
+        let targetPool = null;
+        for (let el of elementsUnder) {
+            if (el.classList && el.classList.contains('timeline-slot')) {
+                targetSlot = el;
+                break;
+            }
+            if (el.id === 'cardsPoolContainer' || (el.classList && el.classList.contains('cards-pool'))) {
+                targetPool = el;
+                break;
+            }
+        }
+        
+        if (targetSlot && dragState.cardData) {
+            const slotIndex = parseInt(targetSlot.getAttribute('data-slot-index'));
+            if (dragState.sourceType === 'pool') {
+                const poolIdx = dragState.sourceIndex;
+                if (poolIdx !== null && currentCards[poolIdx] && currentCards[poolIdx].id === dragState.cardData.id) {
+                    currentCards.splice(poolIdx, 1);
+                    if (placedCards[slotIndex] !== null) {
+                        currentCards.push(placedCards[slotIndex]);
+                    }
+                    placedCards[slotIndex] = dragState.cardData;
+                }
+            } 
+            else if (dragState.sourceType === 'slot') {
+                const sourceSlotIdx = dragState.sourceIndex;
+                if (sourceSlotIdx !== null && placedCards[sourceSlotIdx] && placedCards[sourceSlotIdx].id === dragState.cardData.id) {
+                    if (sourceSlotIdx !== slotIndex) {
+                        const targetCard = placedCards[slotIndex];
+                        placedCards[sourceSlotIdx] = targetCard;
+                        placedCards[slotIndex] = dragState.cardData;
+                    }
+                }
+            }
+        }
+        else if (targetPool && dragState.sourceType === 'slot' && dragState.cardData) {
+            const sourceSlotIdx = dragState.sourceIndex;
+            if (sourceSlotIdx !== null && placedCards[sourceSlotIdx] && placedCards[sourceSlotIdx].id === dragState.cardData.id) {
+                placedCards[sourceSlotIdx] = null;
+                currentCards.push(dragState.cardData);
+            }
+        }
+        
+        if (dragState.sourceElement) dragState.sourceElement.style.opacity = '';
+        if (dragState.ghost) dragState.ghost.remove();
+        dragState.active = false;
+        dragState.cardData = null;
+        dragState.sourceType = null;
+        dragState.sourceIndex = null;
+        dragState.ghost = null;
+        dragState.sourceElement = null;
+        
+        renderAll();
+    }
+    
+    // Render όλων των UI
+    function renderTimelineSlots() {
+        const container = document.getElementById('timelineSlotsContainer');
+        container.innerHTML = '';
+        for (let i = 0; i < currentItems.length; i++) {
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'timeline-slot';
+            slotDiv.setAttribute('data-slot-index', i);
+            const slotNumberSpan = document.createElement('div');
+            slotNumberSpan.className = 'slot-number';
+            slotNumberSpan.innerText = i+1;
+            slotDiv.appendChild(slotNumberSpan);
+            
+            if (placedCards[i] !== null) {
+                const card = placedCards[i];
+                const cardElem = document.createElement('div');
+                cardElem.className = 'slot-card';
+                cardElem.innerHTML = `
+                    <img src="${card.img}" onerror="this.src='https://via.placeholder.com/200x80?text=No+Image'">
+                    <h4>${card.title.substring(0, 40)}</h4>
+                    <div class="location">📍 ${card.location || '?'}</div>
+                `;
+                cardElem.addEventListener('touchstart', (e) => {
+                    onTouchStart(e, card, 'slot', i, cardElem);
+                }, { passive: false });
+                cardElem.addEventListener('touchmove', onTouchMove, { passive: false });
+                cardElem.addEventListener('touchend', onTouchEnd);
+                slotDiv.appendChild(cardElem);
+            } else {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'empty-slot';
+                emptyDiv.innerText = '⬅️ Σύρε κάρτα εδώ';
+                slotDiv.appendChild(emptyDiv);
+            }
+            container.appendChild(slotDiv);
+        }
+    }
+    
+    function renderPool() {
+        const container = document.getElementById('cardsPoolContainer');
+        container.innerHTML = '';
+        if (currentCards.length === 0) {
+            container.innerHTML = '<p style="text-align:center; width:100%;">🎉 Όλες οι κάρτες τοποθετήθηκαν! Μπορείς να μετακινήσεις οποιαδήποτε για διόρθωση.</p>';
+            return;
+        }
+        currentCards.forEach((card, idx) => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'pool-card';
+            cardDiv.setAttribute('data-pool-idx', idx);
+            cardDiv.innerHTML = `
+                <img src="${card.img}" onerror="this.src='https://via.placeholder.com/260x120?text=No+Image'">
+                <h3>${card.title}</h3>
+                <div class="desc">${(card.desc || '').substring(0, 100)}…</div>
+                <div class="location">📍 ${card.location || 'Αρχαία Ελλάδα'}</div>
+            `;
+            cardDiv.addEventListener('touchstart', (e) => {
+                onTouchStart(e, card, 'pool', idx, cardDiv);
+            }, { passive: false });
+            cardDiv.addEventListener('touchmove', onTouchMove, { passive: false });
+            cardDiv.addEventListener('touchend', onTouchEnd);
+            container.appendChild(cardDiv);
+        });
+    }
+    
+    function renderAll() {
+        renderTimelineSlots();
+        renderPool();
+    }
+    
+    function checkOrder() {
+        let correctCount = 0;
+        for (let i=0; i<placedCards.length; i++) {
+            if (placedCards[i] && placedCards[i].id === correctOrderIds[i]) correctCount++;
+        }
+        const feedbackDiv = document.getElementById('feedback');
+        if (correctCount === currentItems.length) {
+            feedbackDiv.innerHTML = '<span class="correct-feedback">🎉 Συγχαρητήρια! Η χρονολογική σειρά είναι απόλυτα σωστή! 🎉</span>';
+        } else {
+            feedbackDiv.innerHTML = `<span class="wrong-feedback">⚠️ Σωστές θέσεις: ${correctCount} / ${currentItems.length}. Συνέχισε τις διορθώσεις σύροντας κάρτες. ⚠️</span>`;
+        }
+    }
+    
+    function resetGame() {
+        // Επαναφορά με βάση το τρέχον currentItems
+        placedCards = new Array(currentItems.length).fill(null);
+        currentCards = shuffleArray([...currentItems]);
+        renderAll();
+        document.getElementById('feedback').innerHTML = '';
+    }
+    
+    // Εισαγωγή από JSON (string)
+    function importJson(jsonString) {
+        try {
+            const parsed = JSON.parse(jsonString);
+            if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('Το JSON πρέπει να είναι array με τουλάχιστον 1 στοιχείο.');
+            // Ελάχιστη επεξεργασία: βεβαιωθείτε ότι υπάρχουν id, year, title, desc, img, location
+            const validated = parsed.map((item, idx) => ({
+                id: item.id || Date.now() + idx,
+                year: item.year || "???",
+                title: item.title || "Χωρίς τίτλο",
+                desc: item.desc || "",
+                img: item.img || "https://via.placeholder.com/300x150?text=No+Image",
+                location: item.location || ""
+            }));
+            loadScenario(validated);
+            // Ενημέρωση dropdown επιλογής (δεν αντιστοιχεί σε προκαθορισμένο)
+            document.getElementById('scenarioSelect').value = "";
+        } catch(e) {
+            alert("Σφάλμα JSON: " + e.message);
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('loadScenarioBtn').addEventListener('click', () => {
+        const selected = document.getElementById('scenarioSelect').value;
+        if (selected === 'philosophy') loadScenario(SCENARIOS.philosophy);
+        else if (selected === 'goldenage') loadScenario(SCENARIOS.goldenage);
+        else alert("Επέλεξε ένα σενάριο");
+    });
+    document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+    document.getElementById('checkBtn').addEventListener('click', checkOrder);
+    document.getElementById('applyJsonBtn').addEventListener('click', () => {
+        const jsonText = document.getElementById('jsonInput').value;
+        if (jsonText.trim()) importJson(jsonText);
+        else alert("Επικόλλησε JSON στο πεδίο");
+    });
+    document.getElementById('jsonUpload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            importJson(ev.target.result);
+            document.getElementById('jsonUpload').value = '';
+        };
+        reader.readAsText(file);
+    });
+    
+    // Αρχική φόρτωση: sessionStorage (από Timeline) → catalog → hardcoded
+    (async function initPuzzle() {
+      const stored = sessionStorage.getItem('tl_data');
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          sessionStorage.removeItem('tl_data');
+          if (Array.isArray(data) && data.length) { loadScenario(data); return; }
+        } catch(e) {}
+      }
+
+      // Φόρτωσε από GitHub catalog
+      const REPO_BASE = (window.TL_CONFIG||{}).REPO_BASE ||
+        'https://raw.githubusercontent.com/dporpatonelis-crypto/Map-Timeline/main/';
+      try {
+        const ar = await fetch(REPO_BASE + 'active_lesson.json', {cache:'no-store'});
+        if (ar.ok) {
+          const al = await ar.json();
+          const lessonId = al.lesson_id;
+          if (lessonId) {
+            const dr = await fetch(REPO_BASE + 'data/' + lessonId + '.json', {cache:'no-store'});
+            if (dr.ok) { const data = await dr.json(); if (Array.isArray(data) && data.length) { loadScenario(data); return; } }
+          }
+        }
+      } catch(e) {}
+
+      // Fallback: hardcoded φιλοσοφία
+      loadScenario(SCENARIOS.philosophy);
+    })();
+</script>
+</body>
+</html>
