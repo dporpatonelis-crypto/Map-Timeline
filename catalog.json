@@ -23,6 +23,14 @@
       "status": "complete",
       "dataFile": "data/20260629_185957_.json",
       "updatedAt": "2026-06-29"
+    },
+    {
+      "id": "20260629_191402_",
+      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260629_191402_.json",
+      "updatedAt": "2026-06-29"
     }
   ]
 }
