@@ -7,6 +7,14 @@
       "status": "complete",
       "dataFile": "data/dionysios_areopagitis.json",
       "updatedAt": "2026-06-26"
+    },
+    {
+      "id": "20260629_180818_",
+      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260629_180818_.json",
+      "updatedAt": "2026-06-29"
     }
   ]
 }
