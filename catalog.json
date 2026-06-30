@@ -31,6 +31,14 @@
       "status": "complete",
       "dataFile": "data/20260629_191402_.json",
       "updatedAt": "2026-06-29"
+    },
+    {
+      "id": "20260630_081144_",
+      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260630_081144_.json",
+      "updatedAt": "2026-06-30"
     }
   ]
 }
