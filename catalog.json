@@ -9,60 +9,20 @@
       "updatedAt": "2026-06-26"
     },
     {
-      "id": "20260629_180818_",
+      "id": "20260701_084428_three-theologians-theological-concept",
+      "title": "null",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260701_084428_three-theologians-theological-concept.json",
+      "updatedAt": "2026-07-01"
+    },
+    {
+      "id": "20260701_092934_",
       "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
       "type": "timeline",
       "status": "complete",
-      "dataFile": "data/20260629_180818_.json",
-      "updatedAt": "2026-06-29"
-    },
-    {
-      "id": "20260629_185957_",
-      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260629_185957_.json",
-      "updatedAt": "2026-06-29"
-    },
-    {
-      "id": "20260629_191402_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260629_191402_.json",
-      "updatedAt": "2026-06-29"
-    },
-    {
-      "id": "20260630_081144_",
-      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260630_081144_.json",
-      "updatedAt": "2026-06-30"
-    },
-    {
-      "id": "20260630_103655_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260630_103655_.json",
-      "updatedAt": "2026-06-30"
-    },
-    {
-      "id": "20260630_122602_",
-      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260630_122602_.json",
-      "updatedAt": "2026-06-30"
-    },
-    {
-      "id": "20260630_124043_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260630_124043_.json",
-      "updatedAt": "2026-06-30"
+      "dataFile": "data/20260701_092934_.json",
+      "updatedAt": "2026-07-01"
     }
   ]
 }
