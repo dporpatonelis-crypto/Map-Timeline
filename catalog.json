@@ -23,6 +23,14 @@
       "status": "complete",
       "dataFile": "data/20260701_092934_.json",
       "updatedAt": "2026-07-01"
+    },
+    {
+      "id": "20260701_100001_apostolic-interpretive-power-nexus",
+      "title": "Apostolic Interpretive Power and Authority",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260701_100001_apostolic-interpretive-power-nexus.json",
+      "updatedAt": "2026-07-01"
     }
   ]
 }
