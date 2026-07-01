@@ -31,6 +31,14 @@
       "status": "complete",
       "dataFile": "data/20260701_100001_apostolic-interpretive-power-nexus.json",
       "updatedAt": "2026-07-01"
+    },
+    {
+      "id": "20260701_110853_oikonomia-tou-pneumatos",
+      "title": "Η Οικονομία του Πνεύματος",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260701_110853_oikonomia-tou-pneumatos.json",
+      "updatedAt": "2026-07-01"
     }
   ]
 }
