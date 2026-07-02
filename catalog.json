@@ -47,6 +47,14 @@
       "status": "complete",
       "dataFile": "data/20260702_075602_.json",
       "updatedAt": "2026-07-02"
+    },
+    {
+      "id": "20260702_091526_the-triple-testimony-of-the-one-god",
+      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260702_091526_the-triple-testimony-of-the-one-god.json",
+      "updatedAt": "2026-07-02"
     }
   ]
 }
