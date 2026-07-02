@@ -55,6 +55,14 @@
       "status": "complete",
       "dataFile": "data/20260702_091526_the-triple-testimony-of-the-one-god.json",
       "updatedAt": "2026-07-02"
+    },
+    {
+      "id": "20260702_152528_",
+      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260702_152528_.json",
+      "updatedAt": "2026-07-02"
     }
   ]
 }
