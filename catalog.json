@@ -39,6 +39,14 @@
       "status": "complete",
       "dataFile": "data/20260701_110853_oikonomia-tou-pneumatos.json",
       "updatedAt": "2026-07-01"
+    },
+    {
+      "id": "20260702_075602_",
+      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260702_075602_.json",
+      "updatedAt": "2026-07-02"
     }
   ]
 }
