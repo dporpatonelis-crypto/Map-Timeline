@@ -71,6 +71,38 @@
       "status": "complete",
       "dataFile": "data/20260702_174242_participation.json",
       "updatedAt": "2026-07-02"
+    },
+    {
+      "id": "20260704_130240_",
+      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260704_130240_.json",
+      "updatedAt": "2026-07-04"
+    },
+    {
+      "id": "20260705_110829_",
+      "title": "null",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260705_110829_.json",
+      "updatedAt": "2026-07-05"
+    },
+    {
+      "id": "20260712_084945_",
+      "title": "To Ainigma tou Origen",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260712_084945_.json",
+      "updatedAt": "2026-07-13"
+    },
+    {
+      "id": "20260715_125646_",
+      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260715_125646_.json",
+      "updatedAt": "2026-07-15"
     }
   ]
 }
