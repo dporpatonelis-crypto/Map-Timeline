@@ -119,6 +119,14 @@
       "status": "complete",
       "dataFile": "data/20260719_173023_.json",
       "updatedAt": "2026-07-19"
+    },
+    {
+      "id": "20260719_180438_spirit-enlightenment",
+      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260719_180438_spirit-enlightenment.json",
+      "updatedAt": "2026-07-19"
     }
   ]
 }
