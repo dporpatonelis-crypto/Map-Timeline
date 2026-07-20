@@ -127,6 +127,14 @@
       "status": "complete",
       "dataFile": "data/20260719_180438_spirit-enlightenment.json",
       "updatedAt": "2026-07-19"
+    },
+    {
+      "id": "20260720_081819_chrysostom",
+      "title": "null",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260720_081819_chrysostom.json",
+      "updatedAt": "2026-07-20"
     }
   ]
 }
