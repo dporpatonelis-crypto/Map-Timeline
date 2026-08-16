@@ -151,6 +151,14 @@
       "status": "complete",
       "dataFile": "data/20260810_171457_lesson.json",
       "updatedAt": "2026-08-10"
+    },
+    {
+      "id": "20260816_080042_three-theologians",
+      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260816_080042_three-theologians.json",
+      "updatedAt": "2026-08-16"
     }
   ]
 }
