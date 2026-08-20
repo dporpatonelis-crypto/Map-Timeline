@@ -159,6 +159,14 @@
       "status": "complete",
       "dataFile": "data/20260816_080042_three-theologians.json",
       "updatedAt": "2026-08-16"
+    },
+    {
+      "id": "i-ypothesi-tou-areiou",
+      "title": "Δύο αίθουσες κρίσης: λογική πρόθεση και εμπειρία σωτηρίας",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/i-ypothesi-tou-areiou.json",
+      "updatedAt": "2026-08-20"
     }
   ]
 }
