@@ -1,156 +1,28 @@
 {
   "scenarios": [
     {
-      "id": "dionysios_areopagitis",
-      "title": "Εξέλιξη της μετοχής",
-      "type": "patristic_text_analysis",
-      "status": "complete",
-      "dataFile": "data/dionysios_areopagitis.json",
-      "updatedAt": "2026-06-26"
-    },
-    {
-      "id": "20260701_084428_three-theologians-theological-concept",
-      "title": "null",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260701_084428_three-theologians-theological-concept.json",
-      "updatedAt": "2026-07-01"
-    },
-    {
-      "id": "20260701_092934_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260701_092934_.json",
-      "updatedAt": "2026-07-01"
-    },
-    {
-      "id": "20260701_100001_apostolic-interpretive-power-nexus",
-      "title": "Apostolic Interpretive Power and Authority",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260701_100001_apostolic-interpretive-power-nexus.json",
-      "updatedAt": "2026-07-01"
-    },
-    {
-      "id": "20260701_110853_oikonomia-tou-pneumatos",
-      "title": "Η Οικονομία του Πνεύματος",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260701_110853_oikonomia-tou-pneumatos.json",
-      "updatedAt": "2026-07-01"
-    },
-    {
-      "id": "20260702_075602_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260702_075602_.json",
-      "updatedAt": "2026-07-02"
-    },
-    {
       "id": "20260702_091526_the-triple-testimony-of-the-one-god",
       "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
       "type": "timeline",
       "status": "complete",
       "dataFile": "data/20260702_091526_the-triple-testimony-of-the-one-god.json",
-      "updatedAt": "2026-07-02"
-    },
-    {
-      "id": "20260702_152528_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260702_152528_.json",
-      "updatedAt": "2026-07-02"
+      "updatedAt": "2026-08-26"
     },
     {
       "id": "20260702_174242_participation",
-      "title": "null",
+      "title": "Το Αίνιγμα του Ωριγένη",
       "type": "timeline",
       "status": "complete",
       "dataFile": "data/20260702_174242_participation.json",
-      "updatedAt": "2026-07-02"
-    },
-    {
-      "id": "20260704_130240_",
-      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260704_130240_.json",
-      "updatedAt": "2026-07-04"
-    },
-    {
-      "id": "20260705_110829_",
-      "title": "null",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260705_110829_.json",
-      "updatedAt": "2026-07-05"
-    },
-    {
-      "id": "20260712_084945_",
-      "title": "To Ainigma tou Origen",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260712_084945_.json",
-      "updatedAt": "2026-07-13"
-    },
-    {
-      "id": "20260715_125646_",
-      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260715_125646_.json",
-      "updatedAt": "2026-07-15"
-    },
-    {
-      "id": "20260715_174148_",
-      "title": "null",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260715_174148_.json",
-      "updatedAt": "2026-07-15"
-    },
-    {
-      "id": "20260719_173023_",
-      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260719_173023_.json",
-      "updatedAt": "2026-07-19"
-    },
-    {
-      "id": "20260719_180438_spirit-enlightenment",
-      "title": "Η Τριπλή Μαρτυρία του Ενός Θεού",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260719_180438_spirit-enlightenment.json",
-      "updatedAt": "2026-07-19"
-    },
-    {
-      "id": "20260720_081819_chrysostom",
-      "title": "null",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260720_081819_chrysostom.json",
-      "updatedAt": "2026-07-20"
+      "updatedAt": "2026-08-26"
     },
     {
       "id": "20260720_143615_",
-      "title": "null",
+      "title": "Ο Απόστολος των Εθνών και το Στόμα της Εκκλησίας",
       "type": "timeline",
       "status": "complete",
       "dataFile": "data/20260720_143615_.json",
-      "updatedAt": "2026-07-20"
-    },
-    {
-      "id": "20260810_171457_lesson",
-      "title": "null",
-      "type": "timeline",
-      "status": "complete",
-      "dataFile": "data/20260810_171457_lesson.json",
-      "updatedAt": "2026-08-10"
+      "updatedAt": "2026-08-26"
     },
     {
       "id": "20260816_080042_three-theologians",
@@ -158,7 +30,15 @@
       "type": "timeline",
       "status": "complete",
       "dataFile": "data/20260816_080042_three-theologians.json",
-      "updatedAt": "2026-08-16"
+      "updatedAt": "2026-08-26"
+    },
+    {
+      "id": "20260825_093143_lesson",
+      "title": "Δύο αίθουσες κρίσης: λογική πρόθεση και εμπειρία σωτηρίας",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/20260825_093143_lesson.json",
+      "updatedAt": "2026-08-26"
     },
     {
       "id": "i-ypothesi-tou-areiou",
@@ -166,7 +46,7 @@
       "type": "timeline",
       "status": "complete",
       "dataFile": "data/i-ypothesi-tou-areiou.json",
-      "updatedAt": "2026-08-20"
+      "updatedAt": "2026-08-26"
     }
   ]
 }
