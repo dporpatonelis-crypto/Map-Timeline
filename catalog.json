@@ -47,6 +47,14 @@
       "status": "complete",
       "dataFile": "data/i-ypothesi-tou-areiou.json",
       "updatedAt": "2026-08-26"
+    },
+    {
+      "id": "to-schedio-tis-theias-oikonomias",
+      "title": "Από την Έξοδο στη διάκριση: η ελευθερία ως πορεία προς το αγαθό",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/to-schedio-tis-theias-oikonomias.json",
+      "updatedAt": "2026-08-27"
     }
   ]
 }
