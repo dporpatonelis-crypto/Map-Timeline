@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Puzzle Timeline - Δυναμική Εισαγωγή JSON (Touch)</title>
+    <title>Puzzle Timeline - Δυναμική Εισαγωγή JSON (Touch & Mouse)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -204,7 +204,7 @@
     </div>
     
     <div class="instruction">
-        ✋🏻 Σύρε με το δάχτυλο οποιαδήποτε κάρτα (από το pool ή από θέση) και άφησέ την πάνω σε άλλη θέση ή πίσω στο pool για διόρθωση.
+        ✋🏻 Σύρε με το δάχτυλο ή το mouse οποιαδήποτε κάρτα (από το pool ή από θέση) και άφησέ την πάνω σε άλλη θέση ή πίσω στο pool για διόρθωση.
     </div>
     
     <div id="timelineSlotsContainer" class="timeline-area"></div>
@@ -307,9 +307,10 @@
         return arr;
     }
     
-    // ========== DRAG & DROP TOUCH (ίδια λογική με πριν, αλλά αναφορά στις current μεταβλητές) ==========
+    // ========== DRAG & DROP TOUCH + MOUSE ==========
     let dragState = {
         active: false,
+        inputType: null,   // 'touch' ή 'mouse'
         cardData: null,
         sourceType: null,   // 'pool' ή 'slot'
         sourceIndex: null,
@@ -318,7 +319,7 @@
         sourceElement: null
     };
     
-    function createGhost(cardData, touchX, touchY) {
+    function createGhost(cardData, clientX, clientY) {
         const ghost = document.createElement('div');
         ghost.className = 'drag-ghost';
         ghost.innerHTML = `
@@ -326,41 +327,33 @@
             <strong>${cardData.title}</strong>
             <div style="font-size:0.7rem;">${cardData.location || ''}</div>
         `;
-        ghost.style.left = `${touchX}px`;
-        ghost.style.top = `${touchY}px`;
+        ghost.style.left = `${clientX}px`;
+        ghost.style.top = `${clientY}px`;
         document.body.appendChild(ghost);
         return ghost;
     }
-    
-    function onTouchStart(e, cardData, sourceType, sourceIndex, element) {
-        e.preventDefault();
+
+    function startDrag(cardData, sourceType, sourceIndex, element, inputType, clientX, clientY) {
         if (dragState.active) return;
         dragState.active = true;
+        dragState.inputType = inputType;
         dragState.cardData = cardData;
         dragState.sourceType = sourceType;
         dragState.sourceIndex = sourceIndex;
         dragState.sourceElement = element;
-        const touch = e.touches[0];
-        dragState.startTouchId = touch.identifier;
-        dragState.ghost = createGhost(cardData, touch.clientX, touch.clientY);
+        dragState.ghost = createGhost(cardData, clientX, clientY);
         element.style.opacity = '0.4';
+        return true;
     }
-    
-    function onTouchMove(e) {
+
+    function moveDrag(clientX, clientY) {
         if (!dragState.active || !dragState.ghost) return;
-        e.preventDefault();
-        const touch = Array.from(e.touches).find(t => t.identifier === dragState.startTouchId);
-        if (!touch) return;
-        dragState.ghost.style.left = `${touch.clientX}px`;
-        dragState.ghost.style.top = `${touch.clientY}px`;
+        dragState.ghost.style.left = `${clientX}px`;
+        dragState.ghost.style.top = `${clientY}px`;
     }
-    
-    function onTouchEnd(e) {
+
+    function finishDrag(endX, endY) {
         if (!dragState.active) return;
-        e.preventDefault();
-        const changedTouch = e.changedTouches[0];
-        const endX = changedTouch.clientX;
-        const endY = changedTouch.clientY;
         const elementsUnder = document.elementsFromPoint(endX, endY);
         
         let targetSlot = null;
@@ -407,16 +400,82 @@
             }
         }
         
+        cleanupDrag();
+        renderAll();
+    }
+
+    function cleanupDrag() {
         if (dragState.sourceElement) dragState.sourceElement.style.opacity = '';
         if (dragState.ghost) dragState.ghost.remove();
         dragState.active = false;
+        dragState.inputType = null;
         dragState.cardData = null;
         dragState.sourceType = null;
         dragState.sourceIndex = null;
+        dragState.startTouchId = null;
         dragState.ghost = null;
         dragState.sourceElement = null;
-        
-        renderAll();
+    }
+
+    function onTouchStart(e, cardData, sourceType, sourceIndex, element) {
+        e.preventDefault();
+        const touch = e.changedTouches[0] || e.touches[0];
+        if (!touch) return;
+        if (startDrag(cardData, sourceType, sourceIndex, element, 'touch', touch.clientX, touch.clientY)) {
+            dragState.startTouchId = touch.identifier;
+        }
+    }
+
+    function onTouchMove(e) {
+        if (!dragState.active || dragState.inputType !== 'touch') return;
+        const touch = Array.from(e.touches).find(t => t.identifier === dragState.startTouchId);
+        if (!touch) return;
+        e.preventDefault();
+        moveDrag(touch.clientX, touch.clientY);
+    }
+
+    function onTouchEnd(e) {
+        if (!dragState.active || dragState.inputType !== 'touch') return;
+        const changedTouch = Array.from(e.changedTouches).find(t => t.identifier === dragState.startTouchId);
+        if (!changedTouch) return;
+        e.preventDefault();
+        finishDrag(changedTouch.clientX, changedTouch.clientY);
+    }
+
+    function onTouchCancel(e) {
+        if (!dragState.active || dragState.inputType !== 'touch') return;
+        e.preventDefault();
+        cleanupDrag();
+    }
+
+    function onMouseDown(e, cardData, sourceType, sourceIndex, element) {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        startDrag(cardData, sourceType, sourceIndex, element, 'mouse', e.clientX, e.clientY);
+    }
+
+    function onMouseMove(e) {
+        if (!dragState.active || dragState.inputType !== 'mouse') return;
+        e.preventDefault();
+        moveDrag(e.clientX, e.clientY);
+    }
+
+    function onMouseUp(e) {
+        if (!dragState.active || dragState.inputType !== 'mouse' || e.button !== 0) return;
+        e.preventDefault();
+        finishDrag(e.clientX, e.clientY);
+    }
+
+    function bindDragHandlers(element, cardData, sourceType, sourceIndex) {
+        element.addEventListener('touchstart', (e) => {
+            onTouchStart(e, cardData, sourceType, sourceIndex, element);
+        }, { passive: false });
+        element.addEventListener('touchmove', onTouchMove, { passive: false });
+        element.addEventListener('touchend', onTouchEnd, { passive: false });
+        element.addEventListener('touchcancel', onTouchCancel, { passive: false });
+        element.addEventListener('mousedown', (e) => {
+            onMouseDown(e, cardData, sourceType, sourceIndex, element);
+        });
     }
     
     // Render όλων των UI
@@ -441,11 +500,7 @@
                     <h4>${card.title.substring(0, 40)}</h4>
                     <div class="location">📍 ${card.location || '?'}</div>
                 `;
-                cardElem.addEventListener('touchstart', (e) => {
-                    onTouchStart(e, card, 'slot', i, cardElem);
-                }, { passive: false });
-                cardElem.addEventListener('touchmove', onTouchMove, { passive: false });
-                cardElem.addEventListener('touchend', onTouchEnd);
+                bindDragHandlers(cardElem, card, 'slot', i);
                 slotDiv.appendChild(cardElem);
             } else {
                 const emptyDiv = document.createElement('div');
@@ -474,11 +529,7 @@
                 <div class="desc">${(card.desc || '').substring(0, 100)}…</div>
                 <div class="location">📍 ${card.location || 'Αρχαία Ελλάδα'}</div>
             `;
-            cardDiv.addEventListener('touchstart', (e) => {
-                onTouchStart(e, card, 'pool', idx, cardDiv);
-            }, { passive: false });
-            cardDiv.addEventListener('touchmove', onTouchMove, { passive: false });
-            cardDiv.addEventListener('touchend', onTouchEnd);
+            bindDragHandlers(cardDiv, card, 'pool', idx);
             container.appendChild(cardDiv);
         });
     }
@@ -532,6 +583,12 @@
     }
     
     // Event listeners
+    document.addEventListener('mousemove', onMouseMove, { passive: false });
+    document.addEventListener('mouseup', onMouseUp, { passive: false });
+    window.addEventListener('blur', () => {
+        if (dragState.active && dragState.inputType === 'mouse') cleanupDrag();
+    });
+
     document.getElementById('loadScenarioBtn').addEventListener('click', () => {
         const selected = document.getElementById('scenarioSelect').value;
         if (selected === 'philosophy') loadScenario(SCENARIOS.philosophy);
