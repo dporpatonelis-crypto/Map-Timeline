@@ -55,6 +55,14 @@
       "status": "complete",
       "dataFile": "data/to-schedio-tis-theias-oikonomias.json",
       "updatedAt": "2026-08-27"
+    },
+    {
+      "id": "paulos-chrysostomos-soma-ekklisias",
+      "title": "Το Σώμα της Εκκλησίας — Διακονία και αλληλεξάρτηση",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/paulos-chrysostomos-soma-ekklisias.json",
+      "updatedAt": "2026-08-29"
     }
   ]
 }
