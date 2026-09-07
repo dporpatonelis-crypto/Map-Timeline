@@ -55,6 +55,14 @@
       "status": "complete",
       "dataFile": "data/to-schedio-tis-theias-oikonomias.json",
       "updatedAt": "2026-08-27"
+    },
+    {
+      "id": "eleftheria-kai-dogmatiki-syneidisi",
+      "title": "Παύλος και Σωφρόνιος — Η ελευθερία γίνεται αγάπη",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/eleftheria-kai-dogmatiki-syneidisi.json",
+      "updatedAt": "2026-09-07"
     }
   ]
 }
