@@ -63,6 +63,14 @@
       "status": "complete",
       "dataFile": "data/eleftheria-kai-dogmatiki-syneidisi.json",
       "updatedAt": "2026-09-07"
+    },
+    {
+      "id": "pisti-exousia-kai-prosopo",
+      "title": "Πίστη, εξουσία και πρόσωπο: από τον ηθικισμό στην καθολική αγάπη",
+      "type": "timeline",
+      "status": "complete",
+      "dataFile": "data/pisti-exousia-kai-prosopo.json",
+      "updatedAt": "2026-10-01"
     }
   ]
 }
