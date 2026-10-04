@@ -1061,7 +1061,8 @@ function selectItem(id) {
       mediaEl.className = 'scene-image';
       mediaEl.id = elId;
       mediaEl.src = item.img;
-      mediaEl.alt = item.title;
+      mediaEl.alt = item.imageAlt || item.title;
+      mediaEl.style.objectFit = item.imageFit === 'contain' ? 'contain' : 'cover';
       display.appendChild(mediaEl);
     }
     badge.style.display = 'none';
